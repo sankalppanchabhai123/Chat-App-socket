@@ -1,4 +1,4 @@
-import { X,  Video } from "lucide-react";
+import { X, Video } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import { useVideoStore } from "../store/useVideoStore";
@@ -42,19 +42,19 @@ const ChatHeader = () => {
     setIsVideoCallActive(false);
   };
 
-  // const handleAcceptCall = async () => {
-  //   if (!peer) {
-  //     toast.error("No valid call signal received.");
-  //     return;
-  //   }
-  //   try {
-  //     await handleIncomingCall(peer);
-  //     setIsVideoCallActive(true);
-  //   } catch (error) {
-  //     console.error("Error answering call:", error);
-  //     toast.error("Failed to answer the call.");
-  //   }
-  // };
+  const handleAcceptCall = async () => {
+    if (!peer) {
+      toast.error("No valid call signal received.");
+      return;
+    }
+    try {
+      await handleIncomingCall(peer);
+      setIsVideoCallActive(true);
+    } catch (error) {
+      console.error("Error answering call:", error);
+      toast.error("Failed to answer the call.");
+    }
+  };
 
   return (
     <div className="p-2.5 border-b border-base-300">
@@ -82,9 +82,8 @@ const ChatHeader = () => {
           <button
             onClick={handleVideoCall}
             disabled={!!callStatus}
-            className={`hover:bg-base-200 p-2 rounded-full transition-colors ${
-              callStatus ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`hover:bg-base-200 p-2 rounded-full transition-colors ${callStatus ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             title="Start video call"
           >
             <Video size={25} />
