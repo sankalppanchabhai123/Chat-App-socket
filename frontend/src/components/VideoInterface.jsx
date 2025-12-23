@@ -25,62 +25,62 @@ const VideoInterface = ({ callType, onClose }) => {
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(true);
-  const [isIncoming,setIsIncoming] = useState(callType === "incoming");
+  const [isIncoming, setIsIncoming] = useState(callType === "incoming");
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(true);
-  const [localStreamInitialized, setLocalStreamInitialized] = useState(false);  
+  const [localStreamInitialized, setLocalStreamInitialized] = useState(false);
   const [remoteStreamInitialized, setRemoteStreamInitialized] = useState(false);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
-  
+
   // Handle local stream
   // Handle local stream
-useEffect(() => {
-  if (localStream && localVideoRef.current) {
-    console.log("Setting local stream...");
-    localVideoRef.current.srcObject = localStream;
-  }
-
-  const localVideoElement = localVideoRef.current;
-
-  return () => {
-    if (localVideoElement) {
-      localVideoElement.srcObject = null; // Cleanup
-    }
-  };
-}, [localStream, localStreamInitialized]);
-
-// Handle remote stream
-useEffect(() => {
-  if (remoteStream && remoteVideoRef.current) {
-    console.log("Setting remote stream...");
-    remoteVideoRef.current.srcObject = remoteStream;
-  }
-
-  const remoteVideoElement = remoteVideoRef.current;
-
-  return () => {
-    if (remoteVideoElement) {
-      remoteVideoElement.srcObject = null; // Cleanup
-    }
-  };
-}, [remoteStream, remoteStreamInitialized]);
-
-// Ensure local and remote streams are updated after answering a call
-useEffect(() => {
-  if (callStatus === "connected" && localStream && remoteStream) {
-    console.log("Updating video elements after call connection...");
-    if (localVideoRef.current) {
+  useEffect(() => {
+    if (localStream && localVideoRef.current) {
+      console.log("Setting local stream...");
       localVideoRef.current.srcObject = localStream;
-      setLocalStreamInitialized(true);
-      setRemoteStreamInitialized(true);
     }
-    if (remoteVideoRef.current) {
+
+    const localVideoElement = localVideoRef.current;
+
+    return () => {
+      if (localVideoElement) {
+        localVideoElement.srcObject = null; // Cleanup
+      }
+    };
+  }, [localStream, localStreamInitialized]);
+
+  // Handle remote stream
+  useEffect(() => {
+    if (remoteStream && remoteVideoRef.current) {
+      console.log("Setting remote stream...");
       remoteVideoRef.current.srcObject = remoteStream;
     }
-    setIsConnecting(false);
-  }
-}, [callStatus, localStream, remoteStream, localStreamInitialized, remoteStreamInitialized]);
+
+    const remoteVideoElement = remoteVideoRef.current;
+
+    return () => {
+      if (remoteVideoElement) {
+        remoteVideoElement.srcObject = null; // Cleanup
+      }
+    };
+  }, [remoteStream, remoteStreamInitialized]);
+
+  // Ensure local and remote streams are updated after answering a call
+  useEffect(() => {
+    if (callStatus === "connected" && localStream && remoteStream) {
+      console.log("Updating video elements after call connection...");
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = localStream;
+        setLocalStreamInitialized(true);
+        setRemoteStreamInitialized(true);
+      }
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
+      setIsConnecting(false);
+    }
+  }, [callStatus, localStream, remoteStream, localStreamInitialized, remoteStreamInitialized]);
 
 
   const handleAcceptCall = async () => {
@@ -88,7 +88,7 @@ useEffect(() => {
     try {
       await answerCall();
       setIsIncoming(false);
-      
+
       console.log("Call answered successfully");
     } catch (error) {
       console.error("Error answering call:", error);
@@ -140,7 +140,7 @@ useEffect(() => {
           <p className="text-lg font-semibold mt-4">
             {getCallStatusText()} {selectedUser?.fullName || "User"}
           </p>
-          
+
           {localStream && (
             <div className="w-64 h-48 mt-4 bg-base-200 rounded-lg overflow-hidden">
               <video
@@ -152,7 +152,7 @@ useEffect(() => {
               />
             </div>
           )}
-          
+
           <div className="flex gap-4 mt-6">
             <button onClick={handleAcceptCall} className="btn btn-success">
               Accept
