@@ -18,7 +18,7 @@ export const getUserForSidebar = async (req, res) => {
 };
 
 export const getMessages = async (req, res) => {
-  // console.log("getting the msgs")                  working fine
+  // console.log("getting the msgs")                  working fine                                    
   try {
     const { id: diffUserId } = req.params;
     const myId = req.user._id;
@@ -50,7 +50,6 @@ export const sendMessage = async (req, res) => {
       // Upload base64 image to cloudinary
       const uploadResponse = await cloudinary.uploader.upload(image);
       imageUrl = uploadResponse.secure_url;
-
     }
 
     const newMessage = new Message({
@@ -64,7 +63,6 @@ export const sendMessage = async (req, res) => {
 
     res.json(newMessage);
     /// this part will below useed for socket.io
-    // here i am baby 
 
     const receiverSocketId = getReceiverSocketId(recieverId);
     if (receiverSocketId) {
@@ -83,11 +81,11 @@ export const sendMessage = async (req, res) => {
 // router.delete ->  /api/message/:id
 export const deleteMessage = async (req, res) => {
   try {
-    const { id:messageId } = req.params;
+    const { id: messageId } = req.params;
     if (!req.user) {
       return res.status(401).send("Unauthorized request");
     }
-    
+
     const userId = req.user._id;
 
     const message = await Message.findById(messageId);
