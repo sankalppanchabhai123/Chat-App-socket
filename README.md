@@ -34,7 +34,7 @@ live-project: [Chat-app](https://real-time-chat-app-with-video-call-using.onrend
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Manas-githu/A-chat-app-using-socket-and-react.git
+   git clone https://github.com/sankalppanchabhai123/Chat-App-socket
    ```
 
 2. Install dependencies:
