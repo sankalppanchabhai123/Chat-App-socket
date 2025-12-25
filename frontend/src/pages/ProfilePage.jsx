@@ -4,12 +4,28 @@ import { Camera, Mail, User } from "lucide-react";
 
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
-  // console.log(authUser);
+  console.log(authUser);
   const [selectedImg, setSelectedImg] = useState(null);
 
+  // const handleImageUpload = async (e) => {
+  //   const file = e.target.files[0];
+  //   if (!file) return;
+
+  //   const reader = new FileReader();
+
+  //   reader.readAsDataURL(file);
+
+  //   reader.onload = async () => {
+  //     const base64Image = reader.result;
+  //     setSelectedImg(base64Image);
+  //     console.log(base64Image);
+  //     await updateProfile({ profilePic: base64Image });
+  //   };
+  // };
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
 
     const reader = new FileReader();
 
@@ -18,8 +34,36 @@ const ProfilePage = () => {
     reader.onload = async () => {
       const base64Image = reader.result;
       setSelectedImg(base64Image);
-      console.log(base64Image);
-      await updateProfile({ profilePic: base64Image });
+
+      console.log("Base64 image first 100 chars:", base64Image.substring(0, 100));
+      console.log("Base64 image length:", base64Image.length);
+
+      try {
+        // Call your updateProfile function
+        const response = await updateProfile({ profilePic: base64Image });
+        console.log("Profile update response:", response);
+
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          console.error("Server response error:", error.response.data);
+          alert(`Upload failed: ${error.response.data.error || error.response.data.message || 'Server error'}`);
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("No response received:", error.request);
+          alert('Upload failed: No response from server');
+        } else {
+          // Something happened in setting up the request
+          console.error("Request setup error:", error.message);
+          alert(`Upload failed: ${error.message}`);
+        }
+      }
+    };
+
+    reader.onerror = (error) => {
+      console.error("FileReader error:", error);
+      alert('Error reading the image file');
     };
   };
 
@@ -37,7 +81,7 @@ const ProfilePage = () => {
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
-                src={selectedImg ||authUser.profile_pic ||  "/image.png"}
+                src={selectedImg || authUser.profile_pic || "/image.png"}
                 alt="Profile"
                 className="size-32 rounded-full object-cover border-4 "
               />

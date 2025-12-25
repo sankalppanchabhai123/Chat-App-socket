@@ -25,23 +25,23 @@ const ChatContainer = () => {
   const messageEndRef = useRef(null);
   const messagedelref = useRef(null);
   const { socket } = useAuthStore();
-  const [msg,setmsg] = useState(false);
-  
+  const [msg, setmsg] = useState(false);
+
   useEffect(() => {
     getMessages(selectedUser._id);
 
-    
-    socket.on("deleteMessage", async ({messageId}) => {
+
+    socket.on("deleteMessage", async ({ messageId }) => {
       setmsg(!msg);
     })
-    
+
     subscribeToMessages();
     return () => {
       unsubscribeFromMessages()
       socket.off("deleteMessage")
     };
-  }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages,deleteMessage,messagedelref,socket,msg]);
-  
+  }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages, deleteMessage, messagedelref, socket, msg]);
+
   useEffect(() => {
     if (messageEndRef.current && messages) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -49,7 +49,7 @@ const ChatContainer = () => {
   }, [messages]);
 
 
-  
+
   const handleDeleteMessage = async (messageId) => {
     toast((t) => (
       <div className="flex flex-col gap-2 w-80 justify-center align-middle">
@@ -65,11 +65,11 @@ const ChatContainer = () => {
             className="bg-red-500 px-3 py-1 rounded-md text-sm text-white hover:bg-red-600 text-center"
             ref={messagedelref}
             onClick={async () => {
-               toast(
+              toast(
                 await deleteMessage(messageId),
                 {
                   success: 'Message deleted!',
-                  duration:5,
+                  duration: 5,
                   loading: 'Deleting...',
                   error: 'Failed to delete message',
                 }
@@ -85,16 +85,16 @@ const ChatContainer = () => {
       duration: 5000,
     });
   };
-  
+
   // console.log(messages.length)
-  if( !messages.length ){
+  if (!messages.length) {
     return (<div className="flex-1 flex flex-col overflow-auto">
-        <ChatHeader />
-        <EmptyChat />
-        <MessageInput />
-      </div>)
+      <ChatHeader />
+      <EmptyChat />
+      <MessageInput />
+    </div>)
   }
-  
+
 
 
   if (isMessagesLoading) {
@@ -112,7 +112,7 @@ const ChatContainer = () => {
     <div className="flex-1 flex flex-col overflow-auto">
       <ChatHeader />
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" >
         {messages.map((message) => (
           <div
             key={message._id}

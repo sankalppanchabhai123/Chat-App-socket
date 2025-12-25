@@ -27,7 +27,7 @@ import { useChatStore } from "./useChatStore";
 const iceServers = {
   iceServers: [
     { urls: "stun:turn.cloudflare.com:3478" }, // ✅ Cloudflare STUN (UDP)
-    
+
     { // ✅ Cloudflare TURN (UDP)
       urls: "turn:turn.cloudflare.com:3478?transport=udp",
       username: "g0553dfdeb0bfb736b04c52d036e3d9caa1a4c7e9bc51f41af4d983337fb1170",
@@ -60,7 +60,7 @@ const iceServers = {
 
 
 
-
+// this component i uncomment
 
 // const ICE_SERVERS = $ node index.js
 // {
@@ -130,7 +130,7 @@ export const useVideoStore = create((set, get) => ({
       const currentUser = useAuthStore.getState().authUser;
 
       const peer = new RTCPeerConnection(iceServers);
-      
+
       // Create remote stream immediately
       const remoteStream = new MediaStream();
       set({ remoteStream, peer });
@@ -142,13 +142,12 @@ export const useVideoStore = create((set, get) => ({
 
       // Handle incoming tracks
       peer.ontrack = (event) => {
-  set((state) => {
-    const newStream = state.remoteStream || new MediaStream();
-    event.streams[0].getTracks().forEach((track) => newStream.addTrack(track));
-    return { remoteStream: newStream };
-  });
-};
-
+        set((state) => {
+          const newStream = state.remoteStream || new MediaStream();
+          event.streams[0].getTracks().forEach((track) => newStream.addTrack(track));
+          return { remoteStream: newStream };
+        });
+      };
 
       peer.onicecandidate = (event) => {
         if (event.candidate) {
@@ -179,7 +178,7 @@ export const useVideoStore = create((set, get) => ({
 
       const offer = await peer.createOffer();
       await peer.setLocalDescription(offer);
-      
+
       socket.emit("call-user", {
         to: userId,
         from: currentUser._id,
@@ -198,7 +197,7 @@ export const useVideoStore = create((set, get) => ({
   handleIncomingCall: async ({ from, signal }) => {
     try {
       const stream = await get().initializeMedia();
-      
+
       set({
         incomingCall: { from, signal },
         callStatus: "incoming",
@@ -210,132 +209,132 @@ export const useVideoStore = create((set, get) => ({
     }
   },
 
- answerCall: async () => {
-  const { incomingCall } = get();
-  if (!incomingCall) return;
+  answerCall: async () => {
+    const { incomingCall } = get();
+    if (!incomingCall) return;
 
-  try {
-    const localStream = await get().initializeMedia();
-    const peer = new RTCPeerConnection(iceServers);
+    try {
+      const localStream = await get().initializeMedia();
+      const peer = new RTCPeerConnection(iceServers);
 
-    // Create remote stream immediately
-    const remoteStream = new MediaStream();
-    set({ remoteStream, peer });
+      // Create remote stream immediately
+      const remoteStream = new MediaStream();
+      set({ remoteStream, peer });
 
-    // Add local tracks to peer connection
-    localStream.getTracks().forEach((track) => {
-      peer.addTrack(track, localStream);
-    });
-
-    // Handle incoming tracks
-    peer.ontrack = (event) => {
-      set((state) => {
-        const newStream = state.remoteStream || new MediaStream();
-        event.streams[0].getTracks().forEach((track) => newStream.addTrack(track));
-        return { remoteStream: newStream };
+      // Add local tracks to peer connection
+      localStream.getTracks().forEach((track) => {
+        peer.addTrack(track, localStream);
       });
-    };
 
-    // Queue ICE candidates if remote description is not set yet
-    peer.onicecandidate = (event) => {
-      if (event.candidate) {
-        const socket = useAuthStore.getState().socket;
-        socket.emit("ice-candidate", {
-          candidate: event.candidate,
-          to: incomingCall.from,
+      // Handle incoming tracks
+      peer.ontrack = (event) => {
+        set((state) => {
+          const newStream = state.remoteStream || new MediaStream();
+          event.streams[0].getTracks().forEach((track) => newStream.addTrack(track));
+          return { remoteStream: newStream };
         });
-      }
-    };
+      };
 
-    peer.onconnectionstatechange = () => {
-      console.log("Connection state changed:", peer.connectionState);
-      if (peer.connectionState === "connected") {
-        set({ callStatus: "connected" });
-      } else if (peer.connectionState === "disconnected") {
-        get().endCall();
-      }
-    };
-
-    peer.oniceconnectionstatechange = () => {
-      console.log("ICE Connection State:", peer.iceConnectionState);
-      if (peer.iceConnectionState === "failed") {
-        toast.error("Connection failed. Please retry.");
-        get().endCall();
-      }
-    };
-
-    // Set remote description first
-    await peer.setRemoteDescription(new RTCSessionDescription(incomingCall.signal));
-
-    // Process queued ICE candidates **after** setting remote description
-    get().iceCandidatesQueue.forEach(async (candidate) => {
-      await peer.addIceCandidate(new RTCIceCandidate(candidate));
-    });
-    set({ iceCandidatesQueue: [] });
-
-    // Create and send answer
-    const answer = await peer.createAnswer();
-    await peer.setLocalDescription(answer);
-
-    const socket = useAuthStore.getState().socket;
-    socket.emit("answer-call", {
-      to: incomingCall.from,
-      signal: answer,
-    });
-
-    set({ callStatus: "connected" });
-
-  } catch (error) {
-    console.error("Error answering call:", error);
-    get().endCall();
-  }
-},
-
-
-handleIceCandidate: async ({ candidate }) => {
-  const { peer, iceCandidatesQueue } = get();
-  try {
-    if (!peer || !candidate) return;
-
-    if (!peer.remoteDescription) {
-      // Queue ICE candidate until remote description is set
-      set((state) => ({
-        iceCandidatesQueue: [...state.iceCandidatesQueue, candidate],
-      }));
-      console.log("Queued ICE candidate:", candidate);
-    } else {
-      // Add received candidate immediately
-      await peer.addIceCandidate(new RTCIceCandidate(candidate));
-      console.log("Added ICE candidate:", candidate);
-
-      // Process any queued candidates (if any)
-      if (iceCandidatesQueue.length > 0) {
-        console.log("Processing queued ICE candidates...");
-        for (const queuedCandidate of iceCandidatesQueue) {
-          await peer.addIceCandidate(new RTCIceCandidate(queuedCandidate));
+      // Queue ICE candidates if remote description is not set yet
+      peer.onicecandidate = (event) => {
+        if (event.candidate) {
+          const socket = useAuthStore.getState().socket;
+          socket.emit("ice-candidate", {
+            candidate: event.candidate,
+            to: incomingCall.from,
+          });
         }
-        set({ iceCandidatesQueue: [] }); // Clear queue after processing
-      }
+      };
+
+      peer.onconnectionstatechange = () => {
+        console.log("Connection state changed:", peer.connectionState);
+        if (peer.connectionState === "connected") {
+          set({ callStatus: "connected" });
+        } else if (peer.connectionState === "disconnected") {
+          get().endCall();
+        }
+      };
+
+      peer.oniceconnectionstatechange = () => {
+        console.log("ICE Connection State:", peer.iceConnectionState);
+        if (peer.iceConnectionState === "failed") {
+          toast.error("Connection failed. Please retry.");
+          get().endCall();
+        }
+      };
+
+      // Set remote description first
+      await peer.setRemoteDescription(new RTCSessionDescription(incomingCall.signal));
+
+      // Process queued ICE candidates **after** setting remote description
+      get().iceCandidatesQueue.forEach(async (candidate) => {
+        await peer.addIceCandidate(new RTCIceCandidate(candidate));
+      });
+      set({ iceCandidatesQueue: [] });
+
+      // Create and send answer
+      const answer = await peer.createAnswer();
+      await peer.setLocalDescription(answer);
+
+      const socket = useAuthStore.getState().socket;
+      socket.emit("answer-call", {
+        to: incomingCall.from,
+        signal: answer,
+      });
+
+      set({ callStatus: "connected" });
+
+    } catch (error) {
+      console.error("Error answering call:", error);
+      get().endCall();
     }
-  } catch (error) {
-    console.error("Error handling ICE candidate:", error);
-  }
-},
+  },
+
+
+  handleIceCandidate: async ({ candidate }) => {
+    const { peer, iceCandidatesQueue } = get();
+    try {
+      if (!peer || !candidate) return;
+
+      if (!peer.remoteDescription) {
+        // Queue ICE candidate until remote description is set
+        set((state) => ({
+          iceCandidatesQueue: [...state.iceCandidatesQueue, candidate],
+        }));
+        console.log("Queued ICE candidate:", candidate);
+      } else {
+        // Add received candidate immediately
+        await peer.addIceCandidate(new RTCIceCandidate(candidate));
+        console.log("Added ICE candidate:", candidate);
+
+        // Process any queued candidates (if any)
+        if (iceCandidatesQueue.length > 0) {
+          console.log("Processing queued ICE candidates...");
+          for (const queuedCandidate of iceCandidatesQueue) {
+            await peer.addIceCandidate(new RTCIceCandidate(queuedCandidate));
+          }
+          set({ iceCandidatesQueue: [] }); // Clear queue after processing
+        }
+      }
+    } catch (error) {
+      console.error("Error handling ICE candidate:", error);
+    }
+  },
 
 
   endCall: () => {
     const { peer, localStream, remoteStream } = get();
     const socket = useAuthStore.getState().socket;
     const { selectedUser } = useChatStore.getState();
-  
+
     if (peer) {
       peer.close();
     }
-    
+
     if (localStream) {
       localStream.getTracks().forEach((track) => track.stop());
     }
-    
+
     if (remoteStream) {
       remoteStream.getTracks().forEach((track) => track.stop());
     }

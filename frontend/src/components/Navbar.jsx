@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/useAuthStore'
 
 const Navbar = () => {
 
-  const {authUser,logout} = useAuthStore();
+  const { authUser, logout } = useAuthStore();
 
   return (
     <header
@@ -19,7 +19,7 @@ const Navbar = () => {
               <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center animate-bounce">
                 <MessageCircleMore />
               </div>
-              <h1 className="text-lg font-bold">Chat App</h1>
+              <h1 className="text-lg font-bold">Chatify</h1>
             </Link>
           </div>
 
