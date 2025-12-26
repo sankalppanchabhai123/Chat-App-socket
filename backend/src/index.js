@@ -9,7 +9,7 @@ import authRoutes from "./routes/auth.route.js";
 import messageRoute from "./routes/message.route.js";
 import { connectDB } from "./lib/db.js";
 dotenv.config();
-import { server, app, io } from "./lib/socket.js";
+import { server, app } from "./lib/socket.js";
 
 const __dirname = path.resolve();
 
