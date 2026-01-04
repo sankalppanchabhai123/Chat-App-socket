@@ -121,10 +121,18 @@ const LoginPage = () => {
       </div>
 
       {/* Right Side - Image/Pattern */}
-      <AuthImagePattern
-        title={"Welcome back!"}
-        subtitle={"Sign in to continue your conversations and catch up with your messages."}
-      />
+      <div className='hidden lg:flex lg:w-full lg:w-1/2 bg-primary/10 items-center justify-center'>
+        <div className='max-w-md p-8'>
+          <div className='relative aspect-square max-w-sn mx-auto'>
+            <img src='sigup.png' className='w-full h-full' />
+          </div>
+
+          <div className='text-center space-y-3 mt-6'>
+            <h2 className="text-2xl font-bold mb-4">Welcome back!</h2>
+            <p className="text-base-content/60">Sign in to continue your conversations and catch up with your messages.</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
